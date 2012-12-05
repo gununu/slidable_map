@@ -292,7 +292,7 @@ public:
     slidable_map(void) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) {}
     slidable_map(const slidable_map& rhs) { *this = rhs; }
     ~slidable_map(void) { clear(); }
-    
+
 #ifndef BOOST_NO_RVALUE_REFERENCES
     slidable_map(slidable_map&& rhs) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) { swap(rhs); }
     slidable_map& operator = (slidable_map&& rhs) {
@@ -301,9 +301,11 @@ public:
         rhs.clear();
         return *this;
     }
-    std::pair<iterator, bool> insert(const Key& key, Type&& val)
+
+    template <class P>
+    std::pair<iterator, bool> insert(P&& kv)
     {
-        auto ret =insertnode(key, std::move(val));
+        auto ret =insertnode(kv.first, std::move(kv.second));
         return std::pair<iterator, bool>(iterator(ret.first, this), ret.second);
     }
 #endif
@@ -311,17 +313,17 @@ public:
 #ifndef BOOST_NO_UNIFIED_INITIALIZETION_SYNTAX
     void insert(std::initializer_list<value_type> list) {
         for (auto& p : list) {
-            insert(p.first, p.second);
+            insert(p);
         }
     }
 #endif
 
-    std::pair<iterator, bool> insert(const Key& key, const Type& val)
+    std::pair<iterator, bool> insert(const value_type& kv)
     {
-        std::pair<node*,bool> ret = insertnode(key, val);
+        std::pair<node*,bool> ret = insertnode(kv.first, kv.second);
         return std::pair<iterator, bool>(iterator(ret.first, this), ret.second);
     }
-   
+
 //#ifndef BOOST_NO_RVALUE_REFERENCES
 //    template <class T>
 //    std::pair<iterator, bool> insert_by(const_iterator where, const Key& whereidx, const Key& key, T&& val)

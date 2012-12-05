@@ -18,10 +18,10 @@ Keyとして 0,1,2,3,4,5,6,7,8,9 が格納されています。
 事前に使用する型が例外安全性の要件を満たしているか確認しておいてください。(特にdurationがnothrowであること)
 
     slidable_map<time_point, duration, std::string> m;
-    m.insert(tp("00:00"), "開会");
-    m.insert(tp("01:00"), "挨拶");
-    m.insert(tp("02:00"), "説明");
-    m.insert(tp("06:00"), "閉会");
+    m.insert({tp("00:00"), "開会"});
+    m.insert({tp("01:00"), "挨拶"});
+    m.insert({tp("02:00"), "説明"});
+    m.insert({tp("06:00"), "閉会"});
 
 ここで'説明'の開始時刻を3分ほど後にずらしたい場合  
 
@@ -38,7 +38,7 @@ Keyとして 0,1,2,3,4,5,6,7,8,9 が格納されています。
     m.insert({{0,"a"},{1,"b"},{2,"c"},{3,"d"},{4,"e"},{5,"f"},{6,"g"},{7,"h"},{8,"i"},{9,"j"}});
     m[6] = "G";
     m.slide_rightkeys(4,+1);
-    m.insert(4, "DD");
+    m.insert({4, "DD"});
 とすると
 
     {0,"a"},{1,"b"},{2,"c"},{3,"d"},{4,"DD"},{5,"e"},{6,"f"},{7,"G"},{8,"h"},{9,"i"},{10,"j"}
@@ -110,18 +110,13 @@ Complexity: O(logN)
 Exception safety: Strong  
 
 
-    std::pair<iterator, bool> insert(const Key& key, Type&& val)  
-    std::pair<iterator, bool> insert(const Key& key, const Type& val)  
-keyの位置にvalを挿入します。戻り値のfirstは挿入された要素または元々存在していた要素へのiteratorです。
+    std::pair<iterator, bool> insert(value_type&& kv)  
+    std::pair<iterator, bool> insert(const value_type& kv)  
+kvを挿入します。戻り値のfirstは挿入された要素または元々存在していた要素へのiteratorです。
 secondは挿入できたことを表すbool値です。falseの場合は既に要素が存在していた異を示します。  
 Complexity: O(logN)  
 Exception safety: Diffがすべての操作に於いてnothrowならば Strong そうでなければ Unsafe  
 
-    std::pair<iterator, bool> insert_by(const_iterator where, Key whereidx, const Key& key, Type&& val)  
-Complexity: O(logN)  
-Exception safety: Diffがすべての操作に於いてnothrowならば Strong そうでなければ Unsafe  
-  
-      
     void slide_rightkeys(const Key& bgn, const Diff& qty)  
 bgn以降のKey全てをqtyだけずらします。  
 移動した結果として既存のKeyの順序が入れ替わったり同じ値になったりしてはいけません。  
