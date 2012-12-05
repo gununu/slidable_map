@@ -179,7 +179,14 @@ Exception safety: depend on Allocator
     slidable_map(const slidable_map& rhs)  
 Complexity: N  
 Exception safety: Strong  
-
+      
+    slidable_map(std::initializer_list<value_type> list)  
+    
+    template <class InputItr>
+    slidable_map(InputItr first, InputItr second)
+Complexity: O(distance(first,second)* log (N+distance(first,second)))  
+Exception safety: Diffがすべての操作に於いてnothrowならば Strong そうでなければ Unsafe  
+      
     ~slidable_map(void)  
 Complexity: N  
 Exception safety: nothrow  
@@ -189,6 +196,11 @@ Exception safety: nothrow
 Complexity: N  
 Exception safety: Strong  
 
+    template <class InputItr>
+    void insert(InputItr first, InputItr second)
+Complexity: O(distance(first,second)* log (N+distance(first,second)))  
+Exception safety: Diffがすべての操作に於いてnothrowならば Basic そうでなければ Unsafe  
+      
     void insert(std::initializer_list<value_type> list)  
 Complexity: O(list.size()* log (N+list.size()))  
 Exception safety: Diffがすべての操作に於いてnothrowならば Basic そうでなければ Unsafe  
