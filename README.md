@@ -249,6 +249,7 @@ Exception safety: nothrow
     iterator find(const Key& key)  
     const_iterator find(const Key& key) const  
     std::pair<iterator, iterator> equal_range(const key_type& keyval)  
+    std::pair<const_iterator, const_iterator> equal_range(const key_type& keyval) const  
     size_type count(const key_type& keyval) const  
 Complexity: O(log N)  
 Exception safety: Strong  

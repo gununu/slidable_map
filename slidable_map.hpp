@@ -826,6 +826,12 @@ public:
             ++last;
         return std::pair<iterator, iterator>(first, last);
     }
+    
+    std::pair<const_iterator, const_iterator> equal_range(const key_type& key) const
+    {
+        std::pair<iterator, iterator> p = const_cast<slidable_map*>(this)->equal_range(key);
+        return std::pair<const_iterator, const_iterator>(p.first, p.second);
+    }
 
     void movekey(const_iterator where, const Diff& qty)
     {
