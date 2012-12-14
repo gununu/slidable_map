@@ -290,7 +290,9 @@ public:
 
 public:
     slidable_map(void) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) {}
+    explicit slidable_map(const Alloc& a) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0), alnod(a), alval(a) {}
     slidable_map(const slidable_map& rhs) { *this = rhs; }
+    slidable_map(const slidable_map& rhs, const Alloc& a): alnod(a), alval(a) { *this = rhs; }
     ~slidable_map(void) { clear(); }
     
     template <class InputItr>
@@ -301,6 +303,7 @@ public:
     
 #ifndef BOOST_NO_RVALUE_REFERENCES
     slidable_map(slidable_map&& rhs) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) { swap(rhs); }
+    slidable_map(slidable_map&& rhs, const Alloc& a) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0), alnod(a), alval(a) { swap(rhs); }
     slidable_map& operator = (slidable_map&& rhs) {
         assert(this != &rhs);
         swap(rhs);

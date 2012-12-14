@@ -173,10 +173,12 @@ Exception safety: Strong
 ####std::map互換の関数
   
     slidable_map(void)  
+    explicit slidable_map(const Alloc&)
 Complexity: Constant  
 Exception safety: depend on Allocator  
 
     slidable_map(const slidable_map& rhs)  
+    slidable_map(const slidable_map& rhs, const Alloc&)
 Complexity: N  
 Exception safety: Strong  
       
@@ -192,6 +194,7 @@ Complexity: N
 Exception safety: nothrow  
   
     slidable_map(slidable_map&& rhs)  
+    slidable_map(slidable_map&& rhs, const Alloc&)
     slidable_map& operator = (slidable_map&& rhs)  
 Complexity: N  
 Exception safety: Strong  
