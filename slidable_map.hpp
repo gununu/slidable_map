@@ -734,7 +734,7 @@ public:
     
     void swap(slidable_map& rhs)
     {
-        if (alval == rhs.alval) {
+        if (alnod == rhs.alnod) {
             std::swap(this->root, rhs.root);
             std::swap(this->rightmost, rhs.rightmost);
             std::swap(this->leftmost, rhs.leftmost);
