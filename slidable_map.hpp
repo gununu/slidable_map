@@ -302,10 +302,12 @@ public:
     }
     
 #ifndef BOOST_NO_RVALUE_REFERENCES
-    slidable_map(slidable_map&& rhs) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) { swap(rhs); }
+    slidable_map(slidable_map&& rhs) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0), alnod(rhs.alnod), alval(rhs.alval) { swap(rhs); }
     slidable_map(slidable_map&& rhs, const Alloc& a) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0), alnod(a), alval(a) { swap(rhs); }
     slidable_map& operator = (slidable_map&& rhs) {
         assert(this != &rhs);
+        alnod = std::move(rhs.alnod);
+        alval = std::move(rhs.alval);
         swap(rhs);
         rhs.clear();
         return *this;
@@ -411,6 +413,8 @@ public:
     slidable_map& operator = (const slidable_map& rhs)
     {
         if (this != &rhs) {
+            alnod = rhs.alnod;
+            alval = rhs.alval;
             root = copynodes(NULL, rhs.root);
             leftmost = getleftmost(root);
             rightmost = getrightmost(root);
