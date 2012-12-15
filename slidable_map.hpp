@@ -377,54 +377,68 @@ public:
             insert(*first);
     }
    
-//#ifndef BOOST_NO_RVALUE_REFERENCES
-//    template <class T>
-//    std::pair<iterator, bool> insert_by(const_iterator where, const Key& whereidx, const Key& key, T&& val)
-//#else
-//    std::pair<iterator, bool> insert_by(const_iterator where, const Key& whereidx, const Key& key, const Type& val)
-//#endif
-//    {
-//        assert(where.wp.pnode && where.wp.container == this);
-//        assert(whereidx < key);
-//        //assert(!(where->first() < whereidx || whereidx < where->first()));
+#ifndef BOOST_NO_RVALUE_REFERENCES
+    template <class T>
+    std::pair<iterator, bool> insert_by(const_iterator hint, Diff diff, T&& val)
+#else
+    std::pair<iterator, bool> insert_by(const_iterator hint, Diff diff, const Type& val)
+#endif
+    {
+        assert(hint.wp.pnode && hint.wp.container == this);
 
-//        node* self = where.wp.pnode;
-//        Diff pos = key-whereidx;
-//        if (self->right) {
-//            self = self->right;
-//            while(true) {
-//                pos -= self->key;
-//                if (!self->left)
-//                    break;
-//                self = self->left;
-//            }
-//        } 
+        node* self = hint.wp.pnode;
+        if(Diff() < diff) {
+            if (self->right) {
+                self = self->right;
+                while(true) {
+                    diff -= self->key;
+                    if (!self->left)
+                        break;
+                    self = self->left;
+                }
+            }
+        } else {
+            if (self->left) {
+                self = self->left;
+                while(true) {
+                    diff -= self->key;
+                    if (!self->right)
+                        break;
+                    self = self->right;
+                }
+            }
+        }
 
-//        node* child = NodeAllocator::allocate(1);
-//        try {
-//#ifndef BOOST_NO_RVALUE_REFERENCES
-//            new ((void*)child) node(self, NULL, NULL, Red, pos, std::forward<T>(val));
-//#else
-//            new ((void*)child) node(self, NULL, NULL, Red, pos, val);
-//#endif
-//        } catch (...) {
-//            NodeAllocator::deallocate(child, 1);
-//            throw;
-//        }
+        node* child = NodeAllocator::allocate(1);
+        try {
+#ifndef BOOST_NO_RVALUE_REFERENCES
+            new ((void*)child) node(self, NULL, NULL, Red, diff, std::forward<T>(val));
+#else
+            new ((void*)child) node(self, NULL, NULL, Red, diff, val);
+#endif
+        } catch (...) {
+            NodeAllocator::deallocate(child, 1);
+            throw;
+        }
 
-//        if (pos < Diff())
-//            self->left = child;
-//        else
-//            self->right = child;
+        if (Diff() < diff) {
+            self->right = child;
+            if (self == rightmost)
+                rightmost = child;
+        } else {
+            self->left = child;
+            if (self == leftmost)
+                leftmost = child;
+        }
         
-//        if (ISRED(self)) {
-//            insert_balance(child);
-//        }
-//        assert(ISBLACK(root));
+        if (ISRED(self)) {
+            insert_balance(child);
+        }
+        assert(ISBLACK(root));
         
-//        ++mysize;
-//        return std::pair<iterator, bool>(iterator(child, this), true);
-//    }
+        ++mysize;
+        return std::pair<iterator, bool>(iterator(child, this), true);
+    }
 
     Type& operator [] (const Key& key)
     {

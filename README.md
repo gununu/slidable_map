@@ -117,6 +117,14 @@ secondは挿入できたことを表すbool値です。falseの場合は既に�
 Complexity: O(logN)  
 Exception safety: Diffがすべての操作に於いてnothrowならば Strong そうでなければ Unsafe  
 
+    template <class T>
+    std::pair<iterator, bool> insert_by(const_iterator hint, const Diff& diff, T&& val)
+hintからdiffの距離だけ離れた位置へvalを挿入します。だだしdiffは既存要素の位置より短い距離でなければなりません。
+insertを使用するよりも高速化が期待できます。
+Complexity: O(logN)  
+Exception safety: Diffがすべての操作に於いてnothrowならば Strong そうでなければ Unsafe  
+
+
     void slide_rightkeys(const Key& bgn, const Diff& qty)  
 bgn以降のKey全てをqtyだけずらします。  
 移動した結果として既存のKeyの順序が入れ替わったり同じ値になったりしてはいけません。  
