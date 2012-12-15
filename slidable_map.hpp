@@ -36,14 +36,36 @@ private:
     T array[N];
     size_t num;
 };
+
+template <class Diff, class Type>
+struct node_base {
+    typedef unsigned char color;
+    node_base(node_base* p, node_base* l, node_base* r, color c, const Diff& k, const Type& t)
+        :left(l), right(r), parent(p), col(c), key(k), val(t){}
+#ifndef BOOST_NO_RVALUE_REFERENCES
+    node_base(node_base* p, node_base* l, node_base* r, color c, const Diff& k, Type&& t)
+        :left(l), right(r), parent(p), col(c), key(k), val(std::move(t)){}
+#endif
+    node_base(const node_base& rhs) : col(rhs.col), key(rhs.key), val(rhs.val) {}
+
+    node_base* left;
+    node_base* right;
+    node_base* parent;
+    color col;
+
+    Diff key;
+    Type val;
+};
 }
 
 template <class Key, class Diff, class Type, class Alloc = std::allocator<std::pair<const Key, Type> > >
-class slidable_map
+class slidable_map : Alloc::template rebind<detail::node_base<Diff,Type> >::other, Alloc
 {
 friend class const_iterator;
 friend class iterator;
-struct node;
+typedef detail::node_base<Diff,Type> node;
+typedef typename Alloc::template rebind<node>::other NodeAllocator;
+typedef Alloc ValueAllocator;
 
 public:
 typedef Key key_type;
@@ -290,9 +312,19 @@ public:
 
 public:
     slidable_map(void) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) {}
-    explicit slidable_map(const Alloc& a) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0), alnod(a), alval(a) {}
-    slidable_map(const slidable_map& rhs) { *this = rhs; }
-    slidable_map(const slidable_map& rhs, const Alloc& a): alnod(a), alval(a) { *this = rhs; }
+    explicit slidable_map(const Alloc& a) : NodeAllocator(a), ValueAllocator(a), root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) {}
+    slidable_map(const slidable_map& rhs) : NodeAllocator(rhs), ValueAllocator(rhs) {
+        root = copynodes(NULL, rhs.root);
+        leftmost = getleftmost(root);
+        rightmost = getrightmost(root);
+        mysize = rhs.mysize; 
+    }
+    slidable_map(const slidable_map& rhs, const Alloc& a): NodeAllocator(a), ValueAllocator(a) { 
+        root = copynodes(NULL, rhs.root);
+        leftmost = getleftmost(root);
+        rightmost = getrightmost(root);
+        mysize = rhs.mysize; 
+    }
     ~slidable_map(void) { clear(); }
     
     template <class InputItr>
@@ -302,12 +334,12 @@ public:
     }
     
 #ifndef BOOST_NO_RVALUE_REFERENCES
-    slidable_map(slidable_map&& rhs) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0), alnod(rhs.alnod), alval(rhs.alval) { swap(rhs); }
-    slidable_map(slidable_map&& rhs, const Alloc& a) : root(NULL), rightmost(NULL), leftmost(NULL), mysize(0), alnod(a), alval(a) { swap(rhs); }
+    slidable_map(slidable_map&& rhs) : NodeAllocator(rhs), ValueAllocator(rhs), root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) { swap(rhs); }
+    slidable_map(slidable_map&& rhs, const Alloc& a) : NodeAllocator(rhs), ValueAllocator(rhs), root(NULL), rightmost(NULL), leftmost(NULL), mysize(0) { swap(rhs); }
     slidable_map& operator = (slidable_map&& rhs) {
         assert(this != &rhs);
-        alnod = std::move(rhs.alnod);
-        alval = std::move(rhs.alval);
+        static_cast<NodeAllocator&>(*this) = std::move(static_cast<NodeAllocator&>(rhs));
+        static_cast<ValueAllocator&>(*this) = std::move(static_cast<ValueAllocator&>(rhs));
         swap(rhs);
         rhs.clear();
         return *this;
@@ -368,7 +400,7 @@ public:
 //            }
 //        } 
 
-//        node* child = alnod.allocate(1);
+//        node* child = NodeAllocator::allocate(1);
 //        try {
 //#ifndef BOOST_NO_RVALUE_REFERENCES
 //            new ((void*)child) node(self, NULL, NULL, Red, pos, std::forward<T>(val));
@@ -376,7 +408,7 @@ public:
 //            new ((void*)child) node(self, NULL, NULL, Red, pos, val);
 //#endif
 //        } catch (...) {
-//            alnod.deallocate(child, 1);
+//            NodeAllocator::deallocate(child, 1);
 //            throw;
 //        }
 
@@ -413,8 +445,9 @@ public:
     slidable_map& operator = (const slidable_map& rhs)
     {
         if (this != &rhs) {
-            alnod = rhs.alnod;
-            alval = rhs.alval;
+            static_cast<NodeAllocator&>(*this) = static_cast<const NodeAllocator&>(rhs);
+            static_cast<ValueAllocator&>(*this) = static_cast<const ValueAllocator&>(rhs);
+            
             node* tmp = copynodes(NULL, rhs.root);
             recursive_erase(root);
             root = tmp;
@@ -543,7 +576,7 @@ public:
             return iterator(NULL, this);
 
         Diff rlkey = key - Key();
-        while(1) {
+        while(1) { 
             if (p->key < rlkey) {
                 if (!p->right) {
                     return iterator(next(p), this);
@@ -740,7 +773,7 @@ public:
     
     void swap(slidable_map& rhs)
     {
-        if (alnod == rhs.alnod) {
+        if (static_cast<NodeAllocator&>(*this) == static_cast<NodeAllocator&>(rhs)) {
             std::swap(this->root, rhs.root);
             std::swap(this->rightmost, rhs.rightmost);
             std::swap(this->leftmost, rhs.leftmost);
@@ -772,8 +805,8 @@ public:
     bool        empty() const { return (root == NULL); }    
     friend void swap(slidable_map& left, slidable_map& right) { left.swap(right);    }
     size_type   size() const { return mysize;    }
-    size_type   max_size() const { return alval.max_size(); }
-    Alloc       get_allocator() const { return alval; }
+    size_type   max_size() const { return ValueAllocator::max_size(); }
+    Alloc       get_allocator() const { return static_cast<const ValueAllocator&>(*this); }
 
     friend bool operator == (const slidable_map& lhs, const slidable_map& rhs) {
         if (lhs.size() != rhs.size())
@@ -787,7 +820,7 @@ public:
         Key qk = q->first();
         for (; p != e; ) {
             if (pk < qk || qk < pk || p->second() < q->second() || q->second() < p->second())
-                return false;
+                return false; 
             p = lhs.next(p, pk);
             q = rhs.next(q, qk);
         }
@@ -799,7 +832,7 @@ public:
     friend bool operator < (const slidable_map& lhs, const slidable_map& rhs) {
         if (lhs.empty() || rhs.empty())
             return false;
-        const_iterator p = lhs.begin(), e = lhs.end();
+        const_iterator p = lhs.begin(), e = lhs.end(); 
         const_iterator q = rhs.begin(), f = rhs.end();
         Key pk = p->first();
         Key qk = q->first();
@@ -967,8 +1000,8 @@ private:
             if (p->right)
                 childstack.push_back(p->right);
 
-            alnod.destroy(p);
-            alnod.deallocate(p, 1);
+            NodeAllocator::destroy(p);
+            NodeAllocator::deallocate(p, 1);
 
             if (leftchild) {    
                 p = leftchild;
@@ -986,7 +1019,7 @@ private:
         if (!org)
             return NULL;
         detail::stack_pod_vector<std::pair<const node*,node*>, 64*2> child;
-        node* const top = alnod.allocate(1);
+        node* const top = NodeAllocator::allocate(1);
         node* p = top;
         try {
             while(true) {
@@ -994,7 +1027,7 @@ private:
                     new ((void*)p) node (*org);
                     p->left = p->right = NULL;
                 } catch (...) {
-                    alnod.deallocate(p, 1);
+                    NodeAllocator::deallocate(p, 1);
                     throw;
                 }
     
@@ -1019,7 +1052,7 @@ private:
                     parent = child.back().second;
                     child.pop_back();
                 }
-                p = alnod.allocate(1);
+                p = NodeAllocator::allocate(1);
             }
         } catch (...) {
             recursive_erase(top);
@@ -1442,7 +1475,7 @@ private:
 #endif
     {
         if (!root) {
-            node* tmp = alnod.allocate(1);
+            node* tmp = NodeAllocator::allocate(1);
             try {
 #ifndef BOOST_NO_RVALUE_REFERENCES
                 new ((void*)tmp) node(NULL, NULL, NULL, Black, key-Key(), std::forward<T>(value));
@@ -1450,7 +1483,7 @@ private:
                 new ((void*)tmp) node(NULL, NULL, NULL, Black, key-Key(), value);
 #endif
             } catch (...) {
-                alnod.deallocate(tmp, 1);
+                NodeAllocator::deallocate(tmp, 1);
                 throw;
             }
             root = leftmost = rightmost = tmp;            
@@ -1463,7 +1496,7 @@ private:
                 return ret;
 
             node* self = ret.first;
-            node* child = alnod.allocate(1);
+            node* child = NodeAllocator::allocate(1);
             try {
 #ifndef BOOST_NO_RVALUE_REFERENCES
                 new ((void*)child) node(self, NULL, NULL, Red, pos, std::forward<T>(value));
@@ -1471,7 +1504,7 @@ private:
                 new ((void*)child) node(self, NULL, NULL, Red, pos, value);
 #endif
             } catch (...) {
-                alnod.deallocate(child, 1);
+                NodeAllocator::deallocate(child, 1);
                 throw;
             }
             
@@ -1526,8 +1559,8 @@ private:
             assert(!next(rightmost));
             assert(!previous(leftmost));
         }
-        alnod.destroy(target);
-        alnod.deallocate(target, 1);
+        NodeAllocator::destroy(target);
+        NodeAllocator::deallocate(target, 1);
         --mysize;
 
         assert(SAFE_ISBLACK(root));
@@ -1550,7 +1583,7 @@ private:
         }
         return NULL;
     }
-    
+
 public:
     bool check_structure() const
     {
@@ -1607,37 +1640,13 @@ protected:
      }
         
 private:
-    typedef unsigned char color;
-
-    static const color Black = 0;
-    static const color Red = 1;
-
-    struct node {
-        node(node* p, node* l, node* r, color c, const Diff& k, const Type& t)
-            :left(l), right(r), parent(p), col(c), key(k), val(t){}
-#ifndef BOOST_NO_RVALUE_REFERENCES
-        node(node* p, node* l, node* r, color c, const Diff& k, Type&& t)
-            :left(l), right(r), parent(p), col(c), key(k), val(std::move(t)){}
-#endif
-        node(const node& rhs) : col(rhs.col), key(rhs.key), val(rhs.val) {}
-
-        node* left;
-        node* right;
-        node* parent;
-        color col;
-
-        Diff key;
-        Type val;
-    };
-
+    static const typename node::color Black = 0;
+    static const typename node::color Red = 1;
+    
     node* root;
     node* rightmost;
     node* leftmost;
     size_type mysize;
-
-    typename Alloc::template rebind<node>::other alnod;
-    typename Alloc::template rebind<value_type>::other alval;
-
 };
 
 } //namespace
