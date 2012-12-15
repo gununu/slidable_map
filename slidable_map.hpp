@@ -415,7 +415,9 @@ public:
         if (this != &rhs) {
             alnod = rhs.alnod;
             alval = rhs.alval;
-            root = copynodes(NULL, rhs.root);
+            node* tmp = copynodes(NULL, rhs.root);
+            recursive_erase(root);
+            root = tmp;
             leftmost = getleftmost(root);
             rightmost = getrightmost(root);
             mysize = rhs.mysize;
