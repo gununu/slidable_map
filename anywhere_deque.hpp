@@ -269,19 +269,19 @@ public:
 
     reference front() {
         assert(!empty());
-        return map.at(0);
+        return map.begin()->second();
     }
     const_reference front() const {
         assert(!empty());
-        return map.at(0);
+        return map.begin()->second();
     }
     reference back() {
         assert(!empty());
-        return map.at(map.size()-1);
+        return map.rbegin()->second();
     }
     const_reference back() const {
         assert(!empty());
-        return map.at(map.size()-1);
+        return map.rbegin()->second();
     }
     
     iterator begin() {
