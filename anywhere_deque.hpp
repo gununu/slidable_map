@@ -76,8 +76,10 @@ public:
     explicit anywhere_deque(const Allocator& a = Allocator()):Allocator(a),map(a){}
     anywhere_deque(const anywhere_deque& r) : Allocator(r), map(r.map) {}
     anywhere_deque(const anywhere_deque& r, const Allocator& a) : Allocator(a), map(r.map, a) {}
+#ifndef BOOST_NO_RVALUE_REFERENCES
     anywhere_deque(anywhere_deque&& r) : Allocator(std::move(r)), map(std::move(r.map)){}
     anywhere_deque(anywhere_deque&& r, const Allocator& a) : Allocator(a), map(std::move(r.map), a){}
+#endif
     anywhere_deque(size_type count, const value_type& val, const Allocator& a = Allocator()) : Allocator(a), map(a) {
             size_type i=size_type();
             for (; i < count; ++i)
