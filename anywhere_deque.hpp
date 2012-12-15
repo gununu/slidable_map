@@ -119,17 +119,29 @@ public:
     }
 
     void push_back(const value_type& val) {
-        map.insert(std::make_pair(map.size(), val));
+        if (empty()) {
+            map.insert(std::make_pair(map.size(), val));
+        } else {
+            map.insert_by(--map.end(), +1, val);
+        }
     }
 #ifndef BOOST_NO_RVALUE_REFERENCES
     void push_back(value_type&& val) {
-        map.insert(std::make_pair(map.size(), std::move(val)));
+        if (empty()) {
+            map.insert(std::make_pair(map.size(), std::move(val)));
+        } else {
+            map.insert_by(--map.end(), +1, std::move(val));
+        }
     }
 #endif
     void push_front(const value_type& val) {
         map.slide_rightkeys(0, +1);
         try {
-            map.insert(std::make_pair(0, val));
+            if (empty()) {
+                map.insert(std::make_pair(0, val));
+            } else {
+                map.insert_by(map.begin(), -1, val);
+            }
         } catch(...) {
             map.slide_rightkeys(0, -1);
             throw;
@@ -139,7 +151,11 @@ public:
     void push_front(value_type&& val) {
         map.slide_rightkeys(0, +1);
         try {
-            map.insert(std::make_pair(0, std::move(val)));
+            if (empty()) {
+                map.insert(std::make_pair(0, std::move(val)));
+            } else {
+                map.insert_by(map.begin(), -1, std::move(val));
+            }
         } catch(...) {
             map.slide_rightkeys(0, -1);
             throw;
