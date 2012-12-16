@@ -37,55 +37,57 @@ std::vector&lt;int&gt;とanywhere_deque&lt;int&gt;でランダム挿入テスト
     void assign(size_type count, const value_type& val) 
     template <class InputIt>
     void assign(InputIt first, InputIt last)
+-
 
     void push_back(const value_type& val)
     void push_back(value_type&& val)
     void push_front(const value_type& val)
     void push_front(value_type&& val)
-Complexity: O(logN)
-Exception Safety: Strong
+Complexity: O(logN)  
+Exception Safety: Strong  
 
     void pop_back()
     void pop_front()
-Complexity: O(logN)
-Exception Safety: Nothrow
+Complexity: O(logN)  
+Exception Safety: Nothrow  
 
     iterator insert(const_iterator pos, const value_type& val)
     iterator insert(const_iterator pos, value_type&& val)
-Complexity: O(logN)
-Exception Safety: Strong
+Complexity: O(logN)  
+Exception Safety: Strong  
 
     template <class InputIt>
     iterator insert(const_iterator pos, InputIt first, InputIt last)
     iterator insert(const_iterator pos, std::initializer_list<value_type> list)
     iterator insert(const_iterator pos, size_type count, const value_type& val)
-Complexity: O(logN) * N
-Exception Safety: Strong
+Complexity: O(logN) * N  
+Exception Safety: Strong  
 
     iterator erase(const_iterator pos) 
-Complexity: O(logN)
-Exception Safety: Nothrow
+Complexity: O(logN)  
+Exception Safety: Nothrow  
 
     iterator erase(const_iterator first, const_iterator last)
     anywhere_deque& operator = (const anywhere_deque& rhs)
     anywhere_deque& operator = (anywhere_deque&& rhs)
+-
 
     reference operator [] (size_type index)
     const_reference operator [] (size_type index) const
-Complexity: O(logN)
-Exception Safety: Nothrow
+Complexity: O(logN)  
+Exception Safety: Nothrow  
 
     reference at(size_type index)
     const_reference at(size_type index) const
-Complexity: O(logN)
-Exception Safety: Strong
+Complexity: O(logN)  
+Exception Safety: Strong  
 
     reference front()
     const_reference front() const
     reference back()
     const_reference back() const
-Complexity: Constant
-Exception Safety: Nothrow
+Complexity: Constant  
+Exception Safety: Nothrow  
 
     iterator begin()
     const_iterator begin() const
@@ -99,17 +101,17 @@ Exception Safety: Nothrow
     reverse_iterator rend()
     const_reverse_iterator rend() const
     const_reverse_iterator crend() const
-Complexity: Constant
-Exception Safety: Nothrow
+Complexity: Constant  
+Exception Safety: Nothrow  
 
     void clear()
-Complexity: O(N)
-Exception Safety: Nothrow
+Complexity: O(N)  
+Exception Safety: Nothrow  
 
     size_type size() const
     bool empty() const
-Complexity: Constant
-Exception Safety: Nothrow
+Complexity: Constant  
+Exception Safety: Nothrow  
 
     size_type max_size() const
     allocator_type get_allocator() const

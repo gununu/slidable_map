@@ -113,14 +113,13 @@ Exception safety: Strong
     std::pair<iterator, bool> insert(value_type&& kv)  
     std::pair<iterator, bool> insert(const value_type& kv)  
 kvを挿入します。戻り値のfirstは挿入された要素または元々存在していた要素へのiteratorです。
-secondは挿入できたことを表すbool値です。falseの場合は既に要素が存在していた異を示します。  
+secondは挿入できたことを表すbool値です。falseの場合は既に要素が存在していたことを示します。  
 Complexity: O(logN)  
 Exception safety: Diffがすべての操作に於いてnothrowならば Strong そうでなければ Unsafe  
 
     template <class T>
     std::pair<iterator, bool> insert_by(const_iterator hint, const Diff& diff, T&& val)
-hintからdiffの距離だけ離れた位置へvalを挿入します。だだしdiffは既存要素の位置より短い距離でなければなりません。
-insertを使用するよりも高速化が期待できます。
+hintからdiffの距離だけ離れた位置へvalを挿入します。だだしdiffは既存要素の位置より短い距離でなければなりません。insertを使用するよりも高速化が期待できます。  
 Complexity: O(logN)  
 Exception safety: Diffがすべての操作に於いてnothrowならば Strong そうでなければ Unsafe  
 
