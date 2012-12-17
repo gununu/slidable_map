@@ -218,8 +218,14 @@ public:
     iterator insert(const_iterator pos, size_type count, const value_type& val) {
         assert(pos.map == this && pos.index <= size());
         size_type r = pos.index;
-        for (size_type i=0; i < count; ++i, ++pos)
-            insert(pos, val);
+        try {
+            for (size_type i=0; i < count; ++i, ++pos)
+                insert(pos, val);
+        } catch (...) {
+            erase(iterator(this,r), pos);
+            throw;
+        }
+
         return iterator(this, r);
     }
     
