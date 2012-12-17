@@ -60,7 +60,7 @@ Exception Safety: Strong
     iterator insert(const_iterator pos, InputIt first, InputIt last)
     iterator insert(const_iterator pos, std::initializer_list<value_type> list)
     iterator insert(const_iterator pos, size_type count, const value_type& val)
-Complexity: O(logN) * N  
+Complexity: O(logN) * (last-first or list.size() or count)  
 Exception Safety: Strong  
 
     iterator erase(const_iterator pos) 
