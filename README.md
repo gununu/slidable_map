@@ -141,6 +141,8 @@ Exception safety: Diffがすべての操作に於いてnothrowならば Strong �
 
     void slide_all(const Diff& qty)
 全てのKeyをqtyだけずらします。移動した結果としてKeyが表現できる値を超えないように注意してください。  
+Complexity: Constant  
+Exception safety: Diffがすべての操作に於いてnothrowならば nothrow そうでなければ Strong  
 
     void movekey(const_iterator where, Diff qty)  
 whereのKeyをqtyだけずらします。  
