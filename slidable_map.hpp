@@ -565,6 +565,12 @@ public:
         }
     }
     
+    void slide_all(const Diff& qty) {
+        if (!root)
+            return;
+        root->key += qty;
+    }
+
     iterator         begin() { return iterator(leftmost, this); }
     const_iterator   begin() const { return const_cast<slidable_map*>(this)->begin();    }
     const_iterator  cbegin() const { return begin(); }

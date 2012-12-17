@@ -138,7 +138,10 @@ bgn以前のKey全てをqtyだけずらします。
 また移動した結果としてKeyが表現できる値を超えないように注意してください。  
 Complexity: O(logN)  
 Exception safety: Diffがすべての操作に於いてnothrowならば Strong そうでなければ Unsafe 
-  
+
+    void slide_all(const Diff& qty)
+全てのKeyをqtyだけずらします。移動した結果としてKeyが表現できる値を超えないように注意してください。  
+
     void movekey(const_iterator where, Diff qty)  
 whereのKeyをqtyだけずらします。  
 移動した結果として既存のKeyとの順序が入れ替わったり同じ値になったりしてはいけません。  
