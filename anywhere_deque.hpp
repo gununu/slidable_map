@@ -135,7 +135,7 @@ public:
     }
 #endif
     void push_front(const value_type& val) {
-        map.slide_rightkeys(0, +1);
+        map.slide_all(+1);
         try {
             if (empty()) {
                 map.insert(std::make_pair(0, val));
@@ -143,13 +143,13 @@ public:
                 map.insert_by(map.begin(), -1, val);
             }
         } catch(...) {
-            map.slide_rightkeys(0, -1);
+            map.slide_all(-1);
             throw;
         }
     }
 #ifndef BOOST_NO_RVALUE_REFERENCES
     void push_front(value_type&& val) {
-        map.slide_rightkeys(0, +1);
+        map.slide_all(+1);
         try {
             if (empty()) {
                 map.insert(std::make_pair(0, std::move(val)));
@@ -157,7 +157,7 @@ public:
                 map.insert_by(map.begin(), -1, std::move(val));
             }
         } catch(...) {
-            map.slide_rightkeys(0, -1);
+            map.slide_all(-1);
             throw;
         }
     }
@@ -169,7 +169,7 @@ public:
     void pop_front() {
         assert(!empty());
         map.erase(map.begin());
-        map.slide_rightkeys(1, -1);
+        map.slide_all(-1);
     }
     iterator insert(const_iterator pos, const value_type& val) {
         assert(pos.map == this && pos.index <= size());
