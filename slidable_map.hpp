@@ -409,34 +409,13 @@ public:
             }
         }
 
-        node* child = NodeAllocator::allocate(1);
-        try {
+        node* child = insert_direct(self, diff,
 #ifndef BOOST_NO_RVALUE_REFERENCES
-            new ((void*)child) node(self, NULL, NULL, Red, diff, std::forward<T>(val));
+            std::forward<T>(val));
 #else
-            new ((void*)child) node(self, NULL, NULL, Red, diff, val);
+            val);
 #endif
-        } catch (...) {
-            NodeAllocator::deallocate(child, 1);
-            throw;
-        }
 
-        if (Diff() < diff) {
-            self->right = child;
-            if (self == rightmost)
-                rightmost = child;
-        } else {
-            self->left = child;
-            if (self == leftmost)
-                leftmost = child;
-        }
-        
-        if (ISRED(self)) {
-            insert_balance(child);
-        }
-        assert(ISBLACK(root));
-        
-        ++mysize;
         return std::pair<iterator, bool>(iterator(child, this), true);
     }
 
@@ -1515,37 +1494,56 @@ private:
             if (!ret.second) 
                 return ret;
 
-            node* self = ret.first;
-            node* child = NodeAllocator::allocate(1);
-            try {
+            node* child = insert_direct(ret.first, pos, 
 #ifndef BOOST_NO_RVALUE_REFERENCES
-                new ((void*)child) node(self, NULL, NULL, Red, pos, std::forward<T>(value));
+                std::forward<T>(value));
 #else
-                new ((void*)child) node(self, NULL, NULL, Red, pos, value);
+                value);
 #endif
-            } catch (...) {
-                NodeAllocator::deallocate(child, 1);
-                throw;
-            }
-            
-            if (Diff() < pos) {
-                self->right = child;
-                if (self == rightmost)
-                    rightmost = child;
-            } else {
-                self->left = child;
-                if (self == leftmost)
-                    leftmost = child;
-            }
 
-            if (ISRED(self)) {
-                insert_balance(child);
-            }
-            assert(ISBLACK(root));
-
-            ++mysize;
             return std::make_pair(child, true);
         }
+    }
+    
+#ifndef BOOST_NO_RVALUE_REFERENCES
+    template <class T>
+    node* insert_direct(node* parent, const Diff& pos, T&& value)
+#else
+    node* insert_direct(node* parent, const Diff& pos, const Type& value)
+#endif
+    {
+        assert(parent);
+        node* child = NodeAllocator::allocate(1);
+        try {
+#ifndef BOOST_NO_RVALUE_REFERENCES
+            new ((void*)child) node(parent, NULL, NULL, Red, pos, std::forward<T>(value));
+#else
+            new ((void*)child) node(parent, NULL, NULL, Red, pos, value);
+#endif
+        } catch (...) {
+            NodeAllocator::deallocate(child, 1);
+            throw;
+        }
+        
+        if (Diff() < pos) {
+            assert(ISNIL(parent->right));
+            parent->right = child;
+            if (parent == rightmost)
+                rightmost = child;
+        } else {
+            assert(ISNIL(parent->left));
+            parent->left = child;
+            if (parent == leftmost)
+                leftmost = child;
+        }
+
+        if (ISRED(parent)) {
+            insert_balance(child);
+        }
+        assert(ISBLACK(root));
+
+        ++mysize;
+        return child;
     }
 
     void erasenode(node* target)
