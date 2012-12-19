@@ -237,9 +237,14 @@ public:
         return iterator(this,pos.index);
     }
     iterator erase(const_iterator first, const_iterator last) {
-        assert(first.map == this && last.map == this && first.index <= size() && last.index <= size());
-        for (size_type i=first.index; i<last.index; ++i)
-            map.erase(i);
+        assert(first.map == this && last.map == this && first.index <= last.index && last.index <= size());
+        if (first == last)
+            return iterator(this,first.index);
+        typename map_type::iterator pos = map.find(first.index);
+        size_type i=first.index;
+        do {
+            pos = map.erase(pos);
+        } while (++i < last.index);
         map.slide_rightkeys(first.index, first-last);
         return iterator(this,first.index);
     }
