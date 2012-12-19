@@ -152,7 +152,7 @@ void ad_push_back() {
     GUNUNU_CHECK(std::equal(v.begin(),v.end(),q.begin()));
     GUNUNU_CHECK(q.front() == v.front());
     GUNUNU_CHECK(q.back() == v.back());
-    for (int i=0; i < v.size(); ++i) {
+    for (size_t i=0; i < v.size(); ++i) {
         GUNUNU_CHECK(v[i] == q[i]);
     }
 }
@@ -216,6 +216,34 @@ void ad_pop_front(boost::random::mt19937& mt) {
     GUNUNU_CHECK(q.empty());
 }
 
+void ad_random_erase_range(boost::random::mt19937& mt) {
+    anywhere_deque<int> q;
+    vector<int> v;
+    v.reserve(20000);
+    
+    for (int i=0; i<20000; ++i) {
+        q.push_back(i);
+        v.push_back(i);
+    }
+    
+    for (int i=0; i<5000; ++i) {
+        if(v.empty())
+            break;
+        boost::random::uniform_int_distribution<> ud(0, q.size()-1);
+        int n = ud(mt);
+        boost::random::uniform_int_distribution<> r(0, 5);
+        int m = r(mt);
+        auto a = q.begin() + n;
+        m = (std::min)(q.end()-a, m);
+        auto b = v.begin() + n;
+        int o = (std::min)(v.end()-b, m);
+        q.erase(a, a + m);
+        v.erase(b, b + o);
+    }
+    GUNUNU_CHECK(q.size() == v.size());
+    GUNUNU_CHECK(std::equal(q.begin(),q.end(),v.begin()));
+}
+
 #ifndef GUNUNU_TEST 
 int main()
 #else
@@ -229,6 +257,7 @@ int test_anywhere_deque()
     ad_interface();
     ad_random_insertion(mt);
     ad_random_erase(mt);
+    ad_random_erase_range(mt);
     ad_push_front();
     ad_push_back();
     ad_swap(mt);
