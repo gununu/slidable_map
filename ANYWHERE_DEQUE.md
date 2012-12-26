@@ -21,8 +21,9 @@ std::dequeとほとんど同じように使用できます。
 swapやoperator=の操作でも無効になります。
 
 ### Performance
-std::vector&lt;int&gt;とanywhere_deque&lt;int&gt;でランダム挿入テストを行うと1000要素を超えたあたりからanywhere_dequeの方が高速になるようです。  
-
+std::vector&lt;int&gt;とanywhere_deque&lt;int&gt;でランダム挿入テストを行うと1000要素を超えたあたりから、
+std::vector&lt;std::string&gt;とanywhere_deque&lt;std::string&gt;なら100要素を超えたあたりからanywhere_dequeの方が高速になるようです。  
+ 
 ### Member 
     explicit anywhere_deque(const Allocator& a = Allocator())
     anywhere_deque(const anywhere_deque& r)
