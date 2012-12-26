@@ -1262,8 +1262,8 @@ private:
                 continue;
             } else if (SAFE_ISBLACK(sibling->left) && SAFE_ISBLACK(sibling->right)) {
                 if (ISBLACK(eparent)) {
-                    sibling->col = Red;
                     node* egrandparent = Parent(eparent);
+                    sibling->col = Red;
                     if (!egrandparent)
                         break;
                     enode = eparent;
@@ -1304,19 +1304,17 @@ private:
     void insert_balance(node* rednode)
     {
         node* rp = Parent(rednode);
-        node* grandparent;
-        bool rpisleft;
-        node* uncle;
+        node* grandparent = Parent(rp);
         while(true) {
             //node* uncle = GETSIBLING(rp);
-            grandparent = Parent(rp);
-            rpisleft = (rp == grandparent->left);
-            uncle = (rpisleft ? grandparent->right : grandparent->left);
+            bool rpisleft = (rp == grandparent->left);
+            node* uncle = (rpisleft ? grandparent->right : grandparent->left);
 
             if (!uncle || ISBLACK(uncle)) {
+                node* rpleft = rp->left;
                 grandparent->col = Red;
                 //if (ISSAMESIDE(rednode, rp)) {
-                if ((rednode == rp->left) == rpisleft) {
+                if ((rednode == rpleft) == rpisleft) {
                     rp->col = Black;
                     if(rpisleft) {
                         rotate_right(grandparent);
@@ -1334,15 +1332,17 @@ private:
                     }
                 }
             } else {
+                node* great_grandparent = Parent(grandparent);
                 rp->col    = Black;
                 uncle->col = Black;
 
-                node* great_grandparent = Parent(grandparent);
                 if (great_grandparent) {
+                    bool needloop = ISRED(great_grandparent);
                     grandparent->col = Red;
-                    if (ISRED(great_grandparent)) {
+                    if (needloop) {
                         rednode = grandparent;
                         rp = great_grandparent;
+                        grandparent = Parent(rp);
                         continue;
                     }
                 }
@@ -1393,12 +1393,11 @@ private:
             SetParent(ntmp, NULL);
             root = ntmp;
         }
-
+        node* ntmpleft = ntmp->left;
         Diff tmpkey = ntmp->key;
         ntmp->key += base->key;
         base->key = -tmpkey;
-        if (ntmp->left) {
-            node* ntmpleft = ntmp->left;
+        if (ntmpleft) {
             ntmpleft->key += tmpkey;
             link2right(base, ntmpleft);
         } else {
@@ -1423,13 +1422,12 @@ private:
             SetParent(ntmp, NULL);
             root = ntmp;
         }
+        node* ntmpright = ntmp->right;
         Diff tmpkey = ntmp->key;
         ntmp->key += base->key;
         base->key = -tmpkey;
-        if (ntmp->right) {
-            node* ntmpright = ntmp->right;
+        if (ntmpright) {
             ntmpright->key += tmpkey;
-
             link2left(base, ntmpright);
         } else {
             link2nullleft(base);
@@ -1536,7 +1534,7 @@ private:
             if (parent == leftmost)
                 leftmost = child;
         }
-
+       
         if (ISRED(parent)) {
             insert_balance(child);
         }
