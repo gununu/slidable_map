@@ -1394,16 +1394,19 @@ private:
             root = ntmp;
         }
         node* ntmpleft = ntmp->left;
-        Diff tmpkey = ntmp->key;
-        ntmp->key += base->key;
-        base->key = -tmpkey;
+        link2left(ntmp, base);
         if (ntmpleft) {
-            ntmpleft->key += tmpkey;
             link2right(base, ntmpleft);
+            Diff tmpkey = ntmp->key;
+            ntmpleft->key += tmpkey;
+            ntmp->key += base->key;
+            base->key = -tmpkey;
         } else {
             link2nullright(base);
+            Diff tmpkey = ntmp->key;
+            ntmp->key += base->key;
+            base->key = -tmpkey;
         }
-        link2left(ntmp, base);
         return ntmp;
     }
 
@@ -1423,16 +1426,20 @@ private:
             root = ntmp;
         }
         node* ntmpright = ntmp->right;
-        Diff tmpkey = ntmp->key;
-        ntmp->key += base->key;
-        base->key = -tmpkey;
+        link2right(ntmp, base);
         if (ntmpright) {
-            ntmpright->key += tmpkey;
             link2left(base, ntmpright);
+            Diff tmpkey = ntmp->key;
+            ntmpright->key += tmpkey;
+            ntmp->key += base->key;
+            base->key = -tmpkey;
         } else {
             link2nullleft(base);
+            Diff tmpkey = ntmp->key;
+            ntmp->key += base->key;
+            base->key = -tmpkey;
         }
-        link2right(ntmp, base);
+        
         return ntmp;
     }
 
