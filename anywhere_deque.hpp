@@ -1,9 +1,10 @@
 #ifndef ANYWHERE_DEQUE_HPP
 #define ANYWHERE_DEQUE_HPP
 
-#include "slidable_map.hpp"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/operators.hpp>
+#include <boost/tuple/tuple.hpp>
+#include "slidable_map.hpp"
 
 namespace gununu {
 template <class T, class Allocator>
@@ -198,21 +199,12 @@ public:
     
     template <class InputIt>
     iterator insert(const_iterator pos, InputIt first, InputIt last) {
-        assert(pos.map == this && pos.index <= size());
-        size_type r = pos.index;
-        try {
-            for (; first != last; ++first, ++pos)
-                insert(pos, *first);
-        } catch (...) {
-            erase(iterator(this, r), pos);
-            throw;
-        }
-        return iterator(this, r);
+        return insert_impl(pos, first, last, typename std::iterator_traits<InputIt>::iterator_category());
     }
     
 #ifndef BOOST_NO_UNIFIED_INITIALIZETION_SYNTAX
     iterator insert(const_iterator pos, std::initializer_list<value_type> list) {
-        return insert(pos, list.begin(), list.end());
+        return insert_impl(pos, list.begin(), list.end(), std::random_access_iterator_tag());
     }
 #endif
     iterator insert(const_iterator pos, size_type count, const value_type& val) {
@@ -361,6 +353,46 @@ public:
     }
 
 private:
+    
+    template <class InputIt>
+    iterator insert_impl(const_iterator pos, InputIt first, InputIt last, std::random_access_iterator_tag const&) {
+        assert(pos.map == this && pos.index <= size());
+        if (first == last)
+            return iterator(this, pos.index);
+        
+        typename map_type::iterator bgn, ins;
+        difference_type qty = std::distance(first, last);
+        map.slide_rightkeys(pos.index, qty);
+        try {
+            boost::tie(bgn, boost::tuples::ignore) = map.insert(std::make_pair(pos.index, *first));
+            ins = bgn;
+            while (++first != last) {
+                boost::tie(ins, boost::tuples::ignore) = map.insert_by(ins, +1, *first);
+            } 
+        } catch (...) {
+            map.erase(bgn, ins);
+            if(ins != map.end())
+                map.erase(ins);
+            map.slide_rightkeys(pos.index, -qty);
+            throw;
+        }
+        return iterator(this, pos.index);
+    }
+    
+    template <class InputIt>
+    iterator insert_impl(const_iterator pos, InputIt first, InputIt last, std::forward_iterator_tag const&) {
+        assert(pos.map == this && pos.index <= size());
+        size_type r = pos.index;
+        try {
+            for (; first != last; ++first, ++pos)
+                insert(pos, *first);
+        } catch (...) {
+            erase(iterator(this, r), pos);
+            throw;
+        }
+        return iterator(this, r);
+    }
+    
     typedef slidable_map<size_type, difference_type, value_type, Allocator> map_type;
     map_type map;
 };
