@@ -495,21 +495,23 @@ public:
         node* p = root;
         Diff rlbgn = bgn - Key();
         while(1) {
-            if (!p) return;
-            while(p->key < rlbgn) {
+            while(true) {
+                if (!p) return;
+                if (!(p->key < rlbgn))
+                    break;
                 rlbgn -= p->key;
                 p = p->right;
-                if (!p) return;    
             }
             rlbgn -= p->key;
             p->key += qty;
             p = p->left;
-            if (!p) return;
-
-            while(!(p->key < rlbgn)) {
+            
+            while(true) {
+                if (!p) return;
+                if (p->key < rlbgn)
+                    break;
                 rlbgn -= p->key;
                 p = p->left;
-                if (!p) return;    
             }
             rlbgn -= p->key;
             p->key -= qty;
