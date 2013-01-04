@@ -40,12 +40,12 @@ private:
     }
     template <class M, class R>
     bool equal(iterator_base<M,Value,R> rhs) const {
-        assert(map && rhs.map);
+        assert(map == rhs.map);
         return this->index == rhs.index;
     }
     template <class M, class R>
     std::ptrdiff_t distance_to(iterator_base<M,Value,R> rhs) const {
-        assert(map && rhs.map);
+        assert(map == rhs.map);
         return (std::ptrdiff_t)rhs.index - this->index;
     }
 
