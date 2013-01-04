@@ -84,12 +84,44 @@ void ad_random_insertion(boost::random::mt19937& mt) {
     vector<int> v;
     v.reserve(10000);
     
+    boost::random::uniform_int_distribution<> rn;
     for (int i=0; i<10000; ++i) {
         boost::random::uniform_int_distribution<> ud(0, q.size());
         int n = ud(mt);
-        int e = ud(mt);
+        int e = rn(mt);
         q.insert(q.begin()+n, e);
         v.insert(v.begin()+n, e);
+    }
+    GUNUNU_CHECK(q.size() == v.size());
+    GUNUNU_CHECK(std::equal(q.begin(),q.end(),v.begin()));
+    GUNUNU_CHECK(q.front() == v.front());
+    GUNUNU_CHECK(q.back() == v.back());
+    GUNUNU_CHECK(std::equal(q.rbegin(),q.rend(),v.rbegin()));
+    
+    anywhere_deque<int> s;
+    s = q;
+    GUNUNU_CHECK(s == q);
+    
+    GUNUNU_CHECK(!q.empty());
+    q.clear();
+    GUNUNU_CHECK(q.empty());
+}
+
+void ad_random_insert_range(boost::random::mt19937& mt) {
+    anywhere_deque<int> q;
+    vector<int> v;
+    v.reserve(10000);
+    
+    boost::random::uniform_int_distribution<> rn;
+    for (int i=0; i<10000; ++i) {
+        boost::random::uniform_int_distribution<> ud(0, q.size());
+        int n = ud(mt);
+        int e = rn(mt);
+        std::vector<int> tmp;
+        for (int loop = boost::random::uniform_int_distribution<>(0, 5)(mt); loop > 0; --loop)
+            tmp.push_back(e + loop);
+        q.insert(q.begin()+n, tmp.begin(), tmp.end());
+        v.insert(v.begin()+n, tmp.begin(), tmp.end());
     }
     GUNUNU_CHECK(q.size() == v.size());
     GUNUNU_CHECK(std::equal(q.begin(),q.end(),v.begin()));
@@ -256,6 +288,7 @@ int test_anywhere_deque()
     mt.seed(std::chrono::system_clock::now().time_since_epoch().count());
     ad_interface();
     ad_random_insertion(mt);
+    ad_random_insert_range(mt);
     ad_random_erase(mt);
     ad_random_erase_range(mt);
     ad_push_front();
