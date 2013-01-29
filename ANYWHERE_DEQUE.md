@@ -5,6 +5,7 @@ push_back, push_front, insert, erase, ランダムアクセスなどの操作は
 全てのメンバ関数についてnothrowまたはstrongな例外安全性を提供します。  
 
 ### Usage
+[boost](http://www.boost.org/)ライブラリが必要です。
 `namespace gununu`にanywhere_dequeが定義されています。
 std::dequeとほとんど同じように使用できます。
 
