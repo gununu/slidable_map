@@ -431,7 +431,7 @@ public:
         if (node* p = findnode(key)) {
             return p->val;
         } else {
-            throw std::out_of_range("");
+            throw std::out_of_range("slidable_map::at");
         }
     }
     
