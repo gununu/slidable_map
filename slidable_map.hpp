@@ -102,7 +102,7 @@ protected:
         wrapper(const wrapper&);// = delete;
         wrapper& operator = (const wrapper&);// = delete;
     public:
-        const Key first() const {
+        Key first() const {
             assert(this->container && this->pnode);
             return slidable_map::getabkey(this->pnode);
         }
