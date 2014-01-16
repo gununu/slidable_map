@@ -40,7 +40,7 @@ here, if you want to delay time of "meeting" by 3 minuites. you can do following
     05:00, "meeting"
     09:00, "closing"
 
-ランダムアクセスと途中への要素の挿入がO(logN)で可能な配列としても利用できます。これをラップしたものが`anywhere_deque`です。
+ランダムアクセスと途中への要素の挿入がO(logN)で可能な配列としても利用できます。これをラップしたものが[anywhere_deque](ANYWHERE_DEQUE.md)です。
 you can also serve as array of random accessible and insertable in O(log N). 'anywhere_deque' is wrapping this function.
                                                                             
     slidable_map<unsigned, int64_t, double> m;
