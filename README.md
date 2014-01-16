@@ -1,12 +1,12 @@
 ##slidable_map
   
-slidable_mapは保持しているKeyを一括して高速(O(log N))に増減が可能なstd::mapライクなコンテナです。
+slidable_mapは保持しているKeyを一括して高速(O(log N))に増減が可能なstd::mapライクなコンテナです。  
 slidable_map is std::map like C++ container, but this can increase and decrease a lump of keys in O(log N).
   
     template <class Key, class Diff, class Type, class Alloc = std::allocator<std::pair<Key, Type> > >
     class slidable_map
   
-Keyはインデックスに使用する型を表し、DiffはKeyの差分を表す型です。
+Keyはインデックスに使用する型を表し、DiffはKeyの差分を表す型です。  
 Key is type of indexing and Diff is type that represent difference of Key.
   
     slidable_map<uint32_t, int64_t, std::string> m =  
@@ -14,13 +14,13 @@ Key is type of indexing and Diff is type that represent difference of Key.
 
 Keyとして 0,1,2,3,4,5,6,7,8,9 が格納されています。
 ここで `m.slide_rightkeys(3, +10);`
-とすると3以降のKeyは+10ずらされて 0,1,2,13,14,15,16,17,18,19となります。 
+とすると3以降のKeyは+10ずらされて 0,1,2,13,14,15,16,17,18,19となります。  
 container has 0,1,2,3,4,5,6,7,8,9 as Key.
 if you call 'm.slide_rightkeys(3, +10);' here,
 after keys of 3 will slide by +10, and then keys will be 0,1,2,13,14,15,16,17,18,19.
                                                         
 例えばchronoのtime_pointとdurationを利用して自由に編集可能なタイムラインを作ることも可能です。
-事前に使用する型が例外安全性の要件を満たしているか確認しておいてください。(特にdurationがnothrowであること)
+事前に使用する型が例外安全性の要件を満たしているか確認しておいてください。(特にdurationがnothrowであること)  
 For example. By using time_point,duration of chrono, can make freely editable timeline.
 On ahead, confilm fullfil requirement of exception safety. (especially, duration shall be nothrow.)
 
@@ -30,7 +30,7 @@ On ahead, confilm fullfil requirement of exception safety. (especially, duration
     timeline.insert({tp("02:00"), "meeting"});
     timeline.insert({tp("06:00"), "closing"});
 
-ここで'meeting'の開始時刻を3分ほど後にずらしたい場合 
+ここで'meeting'の開始時刻を3分ほど後にずらしたい場合  
 here, if you want to delay time of "meeting" by 3 minuites. you can do following:
 
     timeline.slide_rightkeys(tp("2:00"), dr("+03:00"));
@@ -40,7 +40,7 @@ here, if you want to delay time of "meeting" by 3 minuites. you can do following
     05:00, "meeting"
     09:00, "closing"
 
-ランダムアクセスと途中への要素の挿入がO(logN)で可能な配列としても利用できます。これをラップしたものが[anywhere_deque](ANYWHERE_DEQUE.md)です。
+ランダムアクセスと途中への要素の挿入がO(logN)で可能な配列としても利用できます。これをラップしたものが[anywhere_deque](ANYWHERE_DEQUE.md)です。  
 you can also serve as array of random accessible and insertable in O(log N). 'anywhere_deque' is wrapping this function.
                                                                             
     slidable_map<unsigned, int64_t, double> m;
@@ -48,7 +48,7 @@ you can also serve as array of random accessible and insertable in O(log N). 'an
     m[6] = "G";
     m.slide_rightkeys(4,+1);
     m.insert({4, "DD"});
-とすると
+とすると  
 result as
 
     {0,"a"},{1,"b"},{2,"c"},{3,"d"},{4,"DD"},{5,"e"},{6,"f"},{7,"G"},{8,"h"},{9,"i"},{10,"j"}
@@ -65,7 +65,7 @@ result as
     Diff operator - (const Key& lhs, const Key& rhs)  
     Key& operator -= (const Key& lhs, const Diff& rhs)
     bool operator < (const Key& lhs, const Key& rhs)  
-    上記のすべての操作に於いて例外安全がnothrowまたはStrong
+    上記のすべての操作に於いて例外安全がnothrowまたはStrong  
     all above operation shall be nothrow or Strong exception safety.
     destructorがnothrowであること  
 ###Diffに必須の要件 (Diff requirement)  
@@ -78,8 +78,8 @@ result as
     Diff& operator -= (Diff lhs, Diff rhs)  
     Diff& operator += (Diff lhs, Diff rhs)  
     Diff operator -()  
-    上記のすべての操作に於いてnothrow (insertやerase等の操作においてStrongまたはBasicな例外安全を保証するために必要) 
-all above operation shall be nothrow. (in insert, erase, etc... operation needs to have Strong or Basic exceptions safety.)
+    上記のすべての操作に於いてnothrow (insertやerase等の操作においてStrongまたはBasicな例外安全を保証するために必要)  
+    all above operation shall be nothrow. (in insert, erase, etc... operation needs to have Strong or Basic exceptions safety.)  
     destructorがnothrowであること  
 ###Typeに必須の要件(Type requirement)  
     slidable_mapの比較関数を使用する場合には operator < 
@@ -88,7 +88,7 @@ all above operation shall be nothrow. (in insert, erase, etc... operation needs 
                               
 ###Keyの制限 (Key restriction)
 Keyに利用できる値は Keyのデフォルトコンストラクトした初期値+Diffで表現できる値で尚且つ
-slidable_mapに格納される最小値と最大値は双方からDiffで表現できなければなりません。 
+slidable_mapに格納される最小値と最大値は双方からDiffで表現できなければなりません。  
 value of Key shall be represented by initial value of defaul constructed Key + value of Diff.
 and then maximum and minimum value in slidable_map shall be represented each direction by value of Diff.
 
@@ -101,7 +101,7 @@ distance of 0 to -128 is -128 that can represented by Diff, but distance from op
 ###利用可能なiteratorの条件 (requirement of valid iterator)
 有効な要素を指し示しているiteratorはそれ以外の要素への変更があっても利用可能なままです。  
 end(),cend(),rend(),crend(), 空のコンテナのbegin(),cbegin(),rbegin(),crbeginのiteratorは有効な要素を指していません。  
-swap,operator = などで全体の要素が変更された場合iteratorは無効になります。
+swap,operator = などで全体の要素が変更された場合iteratorは無効になります。  
 iterator pointing to valid element is still avaliable.
 if iterator equivalent to end(),cend(),rend(),crend(), empty container's begin(),cbegin(),rbegin(),crbegin, iterator isn't point to valid element.
 if you change whole elements by using swap, operator=,etc.. then iterator will be invalid.
